@@ -10,12 +10,15 @@ import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.AutonomousDistance;
 import frc.robot.commands.AutonomousTime;
-import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOMotor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.xrp.XRPOnBoardIO;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -31,7 +34,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final XRPOnBoardIO m_onboardIO = new XRPOnBoardIO();
-  private final Arm m_arm = new Arm();
+  private Arm m_arm = new Arm(new ArmIOMotor());
 
   // Assumes a gamepad plugged into channel 0
   private final Joystick m_controller = new Joystick(0);
@@ -64,13 +67,16 @@ public class RobotContainer {
 
     JoystickButton joystickAButton = new JoystickButton(m_controller, 1);
     joystickAButton
-        .onTrue(new InstantCommand(() -> m_arm.setAngle(45.0), m_arm))
-        .onFalse(new InstantCommand(() -> m_arm.setAngle(0.0), m_arm));
+        .onTrue(new InstantCommand(() -> m_arm.goToAngle(45.0), m_arm))
+        .onFalse(new InstantCommand(() -> m_arm.zeroPosition(), m_arm));
 
     JoystickButton joystickBButton = new JoystickButton(m_controller, 2);
     joystickBButton
-        .onTrue(new InstantCommand(() -> m_arm.setAngle(90.0), m_arm))
-        .onFalse(new InstantCommand(() -> m_arm.setAngle(0.0), m_arm));
+        .onTrue(Commands.sequence(
+          new InstantCommand(() -> m_arm.goToAngle(90.0), m_arm),
+          new InstantCommand(() -> m_arm.getAngle(), m_arm),
+          new InstantCommand(() -> m_arm.goToAngle(180), m_arm)))
+        .onFalse(new InstantCommand(() -> m_arm.zeroPosition(), m_arm));
 
     // Setup SmartDashboard options
     m_chooser.setDefaultOption("Auto Routine Distance", new AutonomousDistance(m_drivetrain));
