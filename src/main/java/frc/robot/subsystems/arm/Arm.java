@@ -1,18 +1,20 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.arm.ArmIO.ArmIOInputs;
 
 public class Arm extends SubsystemBase {
-    private final ArmIO io;
+    private ArmIO io;
+
+    private final ArmIOInputs inputs = new ArmIOInputs();
 
     public Arm(ArmIO io) {
         this.io = io;
-        zeroPosition();
     }
 
     @Override
     public void periodic() {
-        // This will be called every 20 ms but we don't have anything specific to do here yet (update inputs)
+        io.updateInputs(inputs);
     }
 
     public void goToAngle(double angleDeg) {
@@ -20,10 +22,6 @@ public class Arm extends SubsystemBase {
     }
 
     public double getAngle() {
-        return io.getAngle();
-    }
-
-    public void zeroPosition() {
-        io.zeroPosition();
+        return inputs.positionDeg;
     }
 }
