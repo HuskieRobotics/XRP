@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.AutonomousDistance;
 import frc.robot.commands.AutonomousTime;
+import frc.robot.commands.DriveDistance;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -75,6 +76,19 @@ public class RobotContainer {
     joystickBButton
         .onTrue(
           new InstantCommand(() -> m_arm.goToAngle(90.0), m_arm))
+        .onFalse(new InstantCommand(() -> m_arm.goToAngle(0.0), m_arm));
+
+    
+    JoystickButton joystickCButton = new JoystickButton(m_controller, 3);
+
+    joystickCButton
+        .onTrue(Commands.sequence(
+            new DriveDistance(0.5, 10, m_drivetrain),
+            new InstantCommand(() -> m_arm.goToAngle(0.0), m_arm),
+            Commands.waitSeconds(1),
+            new InstantCommand(() -> m_arm.goToAngle(180.0), m_arm),
+            new DriveDistance(-0.5, 10, m_drivetrain)
+        ))
         .onFalse(new InstantCommand(() -> m_arm.goToAngle(0.0), m_arm));
 
     // Setup SmartDashboard options
